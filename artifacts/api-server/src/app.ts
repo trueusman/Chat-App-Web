@@ -6,28 +6,22 @@ import router from "./routes";
 import { logger } from "./lib/logger";
 
 const app: Express = express();
+const allowedOrigin = process.env["FRONTEND_URL"] || "http://localhost:5173";
 
-app.use(
-  pinoHttp({
-    logger,
-    serializers: {
-      req(req) {
-        return { id: req.id, method: req.method, url: req.url?.split("?")[0] };
-      },
-      res(res) {
-        return { statusCode: res.statusCode };
-      },
-    },
-  })
-);
+app.use(pinoHttp({
+  logger,
+  serializers: {
+    req(req) { return { id: req.id, method: req.method, url: req.url?.split("?")[0] }; },
+    res(res) { return { statusCode: res.statusCode }; },
+  },
+}));
 
-app.use(cors({ origin: "*", credentials: true }));
+app.use(cors({ origin: allowedOrigin, credentials: true }));
 app.use(express.json({ limit: "5mb" }));
 app.use(express.urlencoded({ extended: true, limit: "5mb" }));
 
 const publicDir = path.resolve(__dirname, "../public");
 app.use(express.static(publicDir));
-
 app.use("/api", router);
 
 app.get(/^\/(?!api|socket\.io).*/, (_req: Request, res: Response, _next: NextFunction) => {
