@@ -5,7 +5,8 @@ let socket: Socket | null = null;
 export function getSocket(): Socket {
   if (!socket) {
     const token = localStorage.getItem("cc_token");
-    socket = io("http://localhost:5000", {
+    const url = import.meta.env.VITE_SOCKET_URL || window.location.origin;
+    socket = io(url, {
       path: "/socket.io",
       auth: { token },
       transports: ["websocket"],
